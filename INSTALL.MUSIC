@@ -1,0 +1,28 @@
+# Install MUSIC
+git clone git@github.com:DNSSEC-Provisioning/music.git
+cd music
+make all
+cd musicd
+make
+make install
+cd ../music-cli 
+make
+make install
+
+# Start the MUSIC daemon
+musicd -v
+
+# Add signers
+music-cli signer add -v -s S1 --method ddns --address 10.53.0.1 --auth hmac-sha256:server1.:1234abcd8765 
+music-cli signer add -v -s S2 --method ddns --address 10.53.0.2 --auth hmac-sha256:server2.:abcd87651234
+music-cli signer add -v -s S3 --method ddns --address 10.53.0.3 --auth hmac-sha256:server3.:87651234abcd
+
+# Create a group
+music-cli signergroup add -g GROUP1
+
+# Add zones
+music-cli zone add -z default.bind9.multisigner.example.nl. -g GROUP1
+music-cli zone add -z inline-signing.bind9.multisigner.example.nl. -g GROUP1
+music-cli zone add -z ksk-zsk.bind9.multisigner.example.nl. -g GROUP1
+
+# You are now ready to move the zones through the MUSIC processes

@@ -1,0 +1,91 @@
+options {
+        query-source address 10.53.0.1;
+        notify-source 10.53.0.1;
+        transfer-source 10.53.0.1;
+        port 53;
+        pid-file "named.pid";
+        listen-on { 10.53.0.1; };
+        directory "/var/named1/";
+        key-directory "keys";
+        recursion no;
+        notify no;
+        serial-update-method date;
+};
+
+key rndc_key {
+        secret "1234abcd8765";
+        algorithm hmac-sha256;
+};
+
+controls {
+        inet 10.53.0.1 port 953 allow { any; } keys { rndc_key; };
+};
+
+dnssec-policy "csk" {
+	keys {
+		csk key-directory lifetime unlimited algorithm 13;
+	};
+	cdnskey no;
+	cds-digest-types { };
+};
+
+dnssec-policy "ksk-zsk" {
+	keys {
+		ksk key-directory lifetime unlimited algorithm 13;
+		zsk key-directory lifetime unlimited algorithm 13;
+	};
+	cdnskey no;
+	cds-digest-types { };
+};
+
+key server1 {
+        algorithm hmac-sha256;
+        secret "1234abcd8765";
+};
+
+key server2 {
+        algorithm hmac-sha256;
+        secret "abcd87651234";
+};
+
+key server3 {
+        algorithm hmac-sha256;
+        secret "87651234abcd";
+};
+
+zone "default.bind9.multisigner.example.nl." {
+        type primary;
+        file "db/default.bind9.multisigner.example.nl.db";
+        dnssec-policy csk;
+        update-policy {
+                grant server1. name default.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+                grant server2. name default.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+                grant server3. name default.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+        };
+	//checkds yes;
+};
+
+zone "inline-signing.bind9.multisigner.example.nl." {
+        type primary;
+        file "db/inline-signing.bind9.multisigner.example.nl.db";
+        dnssec-policy csk;
+        inline-signing yes;
+        update-policy {
+                grant server1. name inline-signing.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+                grant server2. name inline-signing.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+                grant server3. name inline-signing.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+        };
+	//checkds yes;
+};
+
+zone "ksk-zsk.bind9.multisigner.example.nl." {
+        type primary;
+        file "db/ksk-zsk.bind9.multisigner.example.nl.db";
+        dnssec-policy ksk-zsk;
+        update-policy {
+                grant server1. name ksk-zsk.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+                grant server2. name ksk-zsk.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+                grant server3. name ksk-zsk.bind9.multisigner.example.nl. DNSKEY CDS CDNSKEY CSYNC NS;
+        };
+	//checkds yes;
+};

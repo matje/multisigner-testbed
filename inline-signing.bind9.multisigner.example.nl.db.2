@@ -1,0 +1,15 @@
+$ORIGIN multisigner.example.nl.
+$TTL 300	; 5 minutes
+
+inline-signing.bind9		IN SOA	mname1. . (
+				13         ; serial
+				20         ; refresh (20 seconds)
+				20         ; retry (20 seconds)
+				1814400    ; expire (3 weeks)
+				3600       ; minimum (1 hour)
+				)
+			NS	ns2.inline-signing.bind9.
+
+ns2			A	10.53.0.2
+
+whoami			TXT	"I am server 2"

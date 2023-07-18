@@ -1,0 +1,15 @@
+$ORIGIN multisigner.example.nl.
+$TTL 300	; 5 minutes
+
+ksk-zsk.bind9		IN SOA	mname1. . (
+				13         ; serial
+				20         ; refresh (20 seconds)
+				20         ; retry (20 seconds)
+				1814400    ; expire (3 weeks)
+				3600       ; minimum (1 hour)
+				)
+			NS	ns3.ksk-zsk.bind9.
+
+ns3			A	10.53.0.3
+
+whoami			TXT	"I am server 3"

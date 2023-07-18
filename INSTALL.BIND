@@ -1,0 +1,25 @@
+# Which server
+SERVERID=1
+
+# Install BIND 9
+git clone https://gitlab.isc.org/isc-projects/bind9.git
+cd bind9
+autoreconf -fi
+./configure
+make
+make install
+
+# Configure BIND 9
+mkdir /var/named${SERVERID}
+mkdir /var/named${SERVERID}/db
+mkdir /var/named${SERVERID}/keys
+mkdir /etc/bind9
+cp named.conf.${SERVERID} /etc/bind9/named.conf
+
+# Add zones
+cp default.bind9.multisigner.example.nl.db.${SERVERID} /var/named${SERVERID}/db
+cp inline-signing.bind9.multisigner.example.nl.db.${SERVERID} /var/named${SERVERID}/db
+cp ksk-zsk.bind9.multisigner.example.nl.db/${SERVERID} /var/named${SERVERID}/db
+
+# Start BIND 9
+named -c /etc/bind9/named.conf
